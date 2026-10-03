@@ -1,0 +1,6 @@
+{
+  "name": "IBNS ERP - Igreja Batista Nacional Sapiranga",
+  "description": "Sistema ERP completo para gestão eclesiástica, financeira, membros, ensino cristão, projetos sociais, evangelismo, eventos e agenda integrada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
