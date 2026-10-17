@@ -9,14 +9,17 @@ import { SocialModule } from './components/social/SocialModule';
 import { MissionsModule } from './components/missions/MissionsModule';
 import { EventsModule } from './components/events/EventsModule';
 import { AgendaModule } from './components/agenda/AgendaModule';
+import { AssetsModule } from './components/assets/AssetsModule';
 import { ReportsModule } from './components/reports/ReportsModule';
 import { SettingsModule } from './components/settings/SettingsModule';
+import { LoginPortal } from './components/auth/LoginPortal';
 import { TransactionFormModal } from './components/finance/TransactionFormModal';
 import { AccountingExportModal } from './components/finance/AccountingExportModal';
-import { ModuleType, TransactionType } from './types';
+import { ModuleType, TransactionType, UserSession } from './types';
 import { db } from './services/db';
 
 export default function App() {
+  const [session, setSession] = useState<UserSession>(db.getSession());
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideSensitiveData, setHideSensitiveData] = useState(false);
@@ -25,6 +28,12 @@ export default function App() {
   const [isQuickTxOpen, setIsQuickTxOpen] = useState(false);
   const [quickTxType, setQuickTxType] = useState<TransactionType>('entrada');
   const [isAccountingZipOpen, setIsAccountingZipOpen] = useState(false);
+
+  useEffect(() => {
+    return db.subscribe(() => {
+      setSession(db.getSession());
+    });
+  }, []);
 
   const handleOpenNewTransaction = (type: TransactionType) => {
     setQuickTxType(type);
@@ -35,6 +44,17 @@ export default function App() {
     setActiveModule(module);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // If user is not authenticated with institutional credentials, render secure login portal
+  if (!session.isAuthenticated) {
+    return (
+      <LoginPortal
+        onLoginSuccess={(newSession) => {
+          setSession(newSession);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
@@ -104,6 +124,12 @@ export default function App() {
 
           {activeModule === 'agenda' && (
             <AgendaModule
+              hideSensitiveData={hideSensitiveData}
+            />
+          )}
+
+          {activeModule === 'assets' && (
+            <AssetsModule
               hideSensitiveData={hideSensitiveData}
             />
           )}

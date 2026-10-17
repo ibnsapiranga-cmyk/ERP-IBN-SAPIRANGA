@@ -10,7 +10,8 @@ import {
   FileSpreadsheet,
   Lock,
   ChevronDown,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
 import { ModuleType, UserRole, UserSession } from '../../types';
 import { db } from '../../services/db';
@@ -327,63 +328,91 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {showRoleSelector && (
-                <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-3 animate-in fade-in slide-in-from-top-2">
-                  <div className="pb-2 mb-2 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Perfil Ativo</p>
-                    <p className="text-sm font-extrabold text-slate-900">{session.name}</p>
-                    <p className="text-xs text-amber-700 font-semibold">{session.roleTitle}</p>
+                <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-3.5 animate-in fade-in slide-in-from-top-2">
+                  <div className="pb-2.5 mb-2.5 border-b border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usuário Autenticado</p>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" /> Domínio Verificado
+                      </span>
+                    </div>
+                    <p className="text-sm font-extrabold text-slate-900 mt-0.5">{session.name || 'Usuário IBNS'}</p>
+                    <p className="text-xs text-amber-700 font-bold">{session.roleTitle || 'Administração'}</p>
+                    <p className="text-[11px] font-mono text-slate-500 mt-0.5">{session.email || 'pastor@ibnsapiranga.com.br'}</p>
                   </div>
 
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-2">
-                    Alternar Perfil para Demonstração:
+                    Alternar Conta Institucional:
                   </p>
 
                   <div className="space-y-1 text-xs">
                     <button
-                      onClick={() => handleSwitchRole('pastor', 'Pastor Presidente', 'Pr. Marcos Oliveira', 'marcos.pastor@ibnsapiranga.org.br')}
+                      onClick={() => handleSwitchRole('pastor', 'Pastor Presidente', 'Pr. Marcos Oliveira', 'pastor@ibnsapiranga.com.br')}
                       className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.role === 'pastor' 
+                        session.email === 'pastor@ibnsapiranga.com.br' 
                           ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <span>Pr. Marcos Oliveira (Pastor Presidente)</span>
+                      <div>
+                        <p className="font-bold">Pr. Marcos Oliveira</p>
+                        <p className="text-[10px] text-slate-500">pastor@ibnsapiranga.com.br</p>
+                      </div>
+                      <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Pastor</span>
                     </button>
                     <button
-                      onClick={() => handleSwitchRole('tesouraria', 'Tesoureiro Chefe', 'Pb. Ricardo Silveira', 'ricardo.tesouraria@ibnsapiranga.org.br')}
+                      onClick={() => handleSwitchRole('tesouraria', 'Tesoureiro Chefe', 'Pb. Ricardo Silveira', 'tesouraria@ibnsapiranga.com.br')}
                       className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.role === 'tesouraria' 
+                        session.email === 'tesouraria@ibnsapiranga.com.br' 
                           ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <span>Pb. Ricardo Silveira (Tesouraria)</span>
+                      <div>
+                        <p className="font-bold">Pb. Ricardo Silveira</p>
+                        <p className="text-[10px] text-slate-500">tesouraria@ibnsapiranga.com.br</p>
+                      </div>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Tesouraria</span>
                     </button>
                     <button
-                      onClick={() => handleSwitchRole('secretaria', 'Secretária Geral', 'Diac. Eliane Silva', 'secretaria@ibnsapiranga.org.br')}
+                      onClick={() => handleSwitchRole('secretaria', 'Secretária Geral', 'Diac. Eliane Silva', 'secretaria@ibnsapiranga.com.br')}
                       className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.role === 'secretaria' 
+                        session.email === 'secretaria@ibnsapiranga.com.br' 
                           ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <span>Diac. Eliane Silva (Secretaria)</span>
+                      <div>
+                        <p className="font-bold">Diac. Eliane Silva</p>
+                        <p className="text-[10px] text-slate-500">secretaria@ibnsapiranga.com.br</p>
+                      </div>
+                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Secretaria</span>
                     </button>
                   </div>
 
-                  {onOpenSecurityModal && (
-                    <div className="pt-2 mt-2 border-t border-slate-100 flex justify-between items-center">
-                      <button
-                        onClick={() => {
-                          setShowRoleSelector(false);
-                          onOpenSecurityModal();
-                        }}
-                        className="text-xs text-amber-700 hover:text-amber-800 font-bold flex items-center gap-1.5"
-                      >
-                        <Lock className="w-3.5 h-3.5" /> Segurança & Auditoria
-                      </button>
-                    </div>
-                  )}
+                  <div className="pt-2.5 mt-2.5 border-t border-slate-100 flex flex-col gap-1.5">
+                    <button
+                      onClick={() => {
+                        setShowRoleSelector(false);
+                        handleNavigate('settings');
+                      }}
+                      className="w-full text-left text-xs text-amber-700 hover:text-amber-900 hover:bg-amber-50/70 p-2 rounded-xl font-bold flex items-center gap-2 transition-colors"
+                    >
+                      <Lock className="w-4 h-4 text-amber-600" />
+                      <span>Configurações de Segurança do ERP</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowRoleSelector(false);
+                        db.logout();
+                      }}
+                      className="w-full text-left text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50/80 p-2 rounded-xl font-bold flex items-center gap-2 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-500" />
+                      <span>Sair / Encerrar Sessão (Logout)</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

@@ -43,6 +43,8 @@ export const BankStatementImportModal: React.FC<BankStatementImportModalProps> =
   const [fileName, setFileName] = useState('');
   const [parsedItems, setParsedItems] = useState<ParsedStatementItem[]>([]);
   const [importResult, setImportResult] = useState<{ importedCount: number } | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiSource, setAiSource] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -71,14 +73,14 @@ export const BankStatementImportModal: React.FC<BankStatementImportModalProps> =
       const sampleCsv = `Data;Descricao;Valor
 ${todayStr};PIX TRANSF MARCOS OLIVEIRA;750.00
 ${todayStr};PIX RECEBIDO JOAO PEDRO SILVA;35.00
-${todayStr};PIX RECEBIDO ANA MARIA SOUZA;500.00
-${todayStr};PIX RECEBIDO LUCAS GABRIEL;20.00
-${todayStr};OFERTA CULTO DE CELEBRACAO;1280.00
-${todayStr};RGE SUL ENERGIA ELETRICA;-1140.50
-${todayStr};CORSAN AGUA E ESGOTO TEMPLO;-320.00
-${todayStr};SUPERMERCADO RISSUL CESTAS BASICAS;-850.00`;
+${todayStr};COMPRA NO DEBITO POSTO IPIRANGA SAPIRANGA;-240.00
+${todayStr};COMPRA NO DEBITO SUPERMERCADO RISSUL CESTAS;-680.50
+${todayStr};PAGTO BOLETO ALUGUEL DO TEMPLO;-3200.00
+${todayStr};PAGTO BOLETO RGE ENERGIA;-980.20
+${todayStr};PIX RECEBIDO OFERTA VOLUNTARIA;45.00
+${todayStr};DEBITO AUTOMATICO TARIFA BANCARIA CESTA;-48.90`;
       setRawContent(sampleCsv);
-      setFileName('extrato_inter_ibns_exemplo.csv');
+      setFileName('extrato_sicredi_ibns_exemplo.csv');
     } else {
       const sampleOfx = `OFXHEADER:100
 DATA:OFXSGML
@@ -90,32 +92,32 @@ DATA:OFXSGML
 <STMTTRN>
 <TRNTYPE>CREDIT
 <DTPOSTED>${dateDigits}
-<TRNAMT>650.00
-<MEMO>PIX RECEBIDO MARCOS OLIVEIRA
+<TRNAMT>750.00
+<MEMO>PIX TRANSF MARCOS OLIVEIRA
 </STMTTRN>
 <STMTTRN>
 <TRNTYPE>CREDIT
 <DTPOSTED>${dateDigits}
 <TRNAMT>40.00
-<MEMO>PIX RECEBIDO DOACAO AVULSA
+<MEMO>PIX RECEBIDO DOACAO CULTO
 </STMTTRN>
 <STMTTRN>
-<TRNTYPE>CREDIT
+<TRNTYPE>DEBIT
 <DTPOSTED>${dateDigits}
-<TRNAMT>1200.00
-<MEMO>PIX RECEBIDO ANA MARIA SOUZA
+<TRNAMT>-240.00
+<MEMO>COMPRA NO DEBITO POSTO IPIRANGA SAPIRANGA
+</STMTTRN>
+<STMTTRN>
+<TRNTYPE>DEBIT
+<DTPOSTED>${dateDigits}
+<TRNAMT>-680.50
+<MEMO>COMPRA NO DEBITO SUPERMERCADO RISSUL
 </STMTTRN>
 <STMTTRN>
 <TRNTYPE>DEBIT
 <DTPOSTED>${dateDigits}
 <TRNAMT>-3200.00
 <MEMO>PAGTO BOLETO ALUGUEL DO TEMPLO
-</STMTTRN>
-<STMTTRN>
-<TRNTYPE>DEBIT
-<DTPOSTED>${dateDigits}
-<TRNAMT>-850.00
-<MEMO>PIX PAGTO CONVENCAO CBN
 </STMTTRN>
 </BANKTRANLIST>
 </STMTRS>
@@ -127,20 +129,35 @@ DATA:OFXSGML
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyzeWithAi = async () => {
     if (!rawContent.trim()) {
       alert('Por favor, selecione um arquivo de extrato ou cole o texto do extrato.');
       return;
     }
 
-    const items = db.parseStatementForReview(rawContent, selectedAccountId, fileFormat);
-    if (items.length === 0) {
-      alert('Nenhuma transação foi detectada no arquivo. Verifique o formato selecionado.');
-      return;
+    setIsAiLoading(true);
+    try {
+      const result = await db.reconcileWithAi(rawContent, selectedAccountId, fileFormat);
+      if (result.items.length === 0) {
+        alert('Nenhuma movimentação foi detectada no extrato.');
+        setIsAiLoading(false);
+        return;
+      }
+      setParsedItems(result.items);
+      setAiSource(result.source);
+      setStep('review');
+    } catch (err) {
+      console.error('Error in AI reconciliation:', err);
+      const items = db.parseStatementForReview(rawContent, selectedAccountId, fileFormat);
+      setParsedItems(items);
+      setStep('review');
+    } finally {
+      setIsAiLoading(false);
     }
+  };
 
-    setParsedItems(items);
-    setStep('review');
+  const handleAnalyze = () => {
+    handleAnalyzeWithAi();
   };
 
   const handleToggleSelectAll = (checked: boolean) => {

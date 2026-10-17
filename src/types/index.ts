@@ -20,6 +20,7 @@ export type ModuleType =
   | 'events'
   | 'agenda'
   | 'reports'
+  | 'assets'
   | 'settings';
 
 // ==================== FINANCEIRO ====================
@@ -93,7 +94,7 @@ export interface FinancialTransaction {
   isAnonymous?: boolean;
   isFixedRecurring?: boolean;
   fixedExpenseId?: string;
-  paymentMethod: 'Pix' | 'Transferência Bancária' | 'Boleto' | 'Dinheiro' | 'Cartão' | 'Débito Automático';
+  paymentMethod: 'Pix' | 'Transferência Bancária' | 'Boleto' | 'Dinheiro' | 'Cartão' | 'Cartão de Débito' | 'Cartão de Crédito' | 'Débito Automático' | string;
   notes?: string;
   attachments: TransactionAttachment[];
   createdAt: string;
@@ -381,3 +382,133 @@ export interface AuditLog {
   details: string;
   ipAddress?: string;
 }
+
+// ==================== PATRIMÔNIO & BENS ====================
+export type AssetCategory = 
+  | 'Instrumentos & Som'
+  | 'Áudio & Vídeo / Transmissão'
+  | 'Iluminação & Elétrica'
+  | 'Mobiliário & Decoração'
+  | 'Informática & TI'
+  | 'Eletrodomésticos & Climatização'
+  | 'Veículos & Transporte'
+  | 'Imóveis & Terrenos'
+  | 'Outros';
+
+export type AssetLocation = 
+  | 'Templo Principal / Nave'
+  | 'Altar / Púlpito'
+  | 'Cabine de Som & Mídia'
+  | 'Galpão Kids / Salas EBD'
+  | 'Gabinete Pastoral'
+  | 'Secretaria & Tesouraria'
+  | 'Cozinha / Salão Social'
+  | 'Berçário'
+  | 'Anexo / Garagem'
+  | 'Área Externa';
+
+export type AssetCondition = 
+  | 'Excelente'
+  | 'Bom'
+  | 'Regular'
+  | 'Necessita Manutenção'
+  | 'Danificado / Inoperante'
+  | 'Baixado / Descartado';
+
+export interface AssetMaintenanceRecord {
+  id: string;
+  date: string;
+  description: string;
+  cost: number;
+  provider?: string;
+  performedBy: string;
+  notes?: string;
+}
+
+export interface AssetLoanRecord {
+  id: string;
+  borrowerName: string;
+  borrowerPhone: string;
+  borrowerRole: string;
+  loanDate: string;
+  expectedReturnDate: string;
+  returnedDate?: string;
+  status: 'ativo' | 'devolvido' | 'atrasado';
+  purpose: string;
+  notes?: string;
+}
+
+export interface ChurchAsset {
+  id: string;
+  code: string; // Ex: PAT-0001
+  name: string;
+  category: AssetCategory;
+  location: AssetLocation;
+  condition: AssetCondition;
+  acquisitionValue: number;
+  acquisitionDate: string;
+  documentNumber?: string; // NF / Recibo
+  supplier?: string;
+  currentEstimatedValue?: number;
+  depreciationRateAnnual?: number; // % ao ano
+  responsiblePerson: string; // Guardião / Ministério
+  serialNumber?: string;
+  brandModel?: string;
+  photoUrl?: string;
+  notes?: string;
+  status: 'ativo' | 'em_manutencao' | 'emprestado' | 'baixado';
+  maintenanceHistory: AssetMaintenanceRecord[];
+  loansHistory: AssetLoanRecord[];
+  writeOffReason?: string;
+  writeOffDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ==================== SEGURANÇA E USUÁRIOS ERP ====================
+export interface ErpUser {
+  id: string;
+  name: string;
+  email: string; // Exclusivamente @ibnsapiranga.com.br
+  role: UserRole;
+  roleTitle: string;
+  status: 'ativo' | 'bloqueado';
+  phone?: string;
+  department?: string;
+  password?: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface SecurityEventLog {
+  id: string;
+  timestamp: string;
+  type: 
+    | 'LOGIN_SUCCESS' 
+    | 'LOGIN_FAILED' 
+    | 'BOT_DETECTED' 
+    | 'BRUTE_FORCE_BLOCKED' 
+    | 'NON_BRAZIL_IP_BLOCKED' 
+    | 'RATE_LIMIT_EXCEEDED' 
+    | 'DOMAIN_RESTRICTION_REJECTED';
+  emailAttempted?: string;
+  ipAddress: string;
+  country: string;
+  userAgent?: string;
+  details: string;
+  blocked: boolean;
+}
+
+export interface SecuritySettings {
+  restrictDomainOnly: boolean; // obriga @ibnsapiranga.com.br
+  allowedDomain: string; // 'ibnsapiranga.com.br'
+  blockNonBrazilIps: boolean;
+  maxFailedAttempts: number; // default 5
+  lockoutMinutes: number; // default 15
+  enableAntiBotCaptcha: boolean;
+  enableAntiDdosRateLimit: boolean;
+  simulateForeignIp: boolean; // para teste da proteção
+  ipWhitelist: string[];
+  ipBlacklist: string[];
+}
+

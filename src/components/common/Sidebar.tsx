@@ -12,7 +12,8 @@ import {
   Shield, 
   X,
   Church,
-  ChevronRight
+  ChevronRight,
+  Landmark
 } from 'lucide-react';
 import { ModuleType } from '../../types';
 
@@ -101,8 +102,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: 'Escalas'
     },
     {
+      id: 'assets' as ModuleType,
+      label: '8. Patrimônio & Bens',
+      icon: Landmark,
+      badge: 'Tombo & Cautelas'
+    },
+    {
       id: 'reports' as ModuleType,
-      label: '8. Relatórios Contábeis',
+      label: '9. Relatórios Contábeis',
       icon: BarChart3,
       badge: 'Balancete ZIP'
     },
@@ -110,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'settings' as ModuleType,
       label: 'Segurança & Auditoria',
       icon: Shield,
-      badge: 'LGPD'
+      badge: 'Firewall & LGPD'
     }
   ];
 

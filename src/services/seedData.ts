@@ -15,7 +15,10 @@ import {
   SupportedMissionary, 
   ChurchEvent, 
   EventRegistration,
-  AuditLog
+  AuditLog,
+  ChurchAsset,
+  ErpUser,
+  SecuritySettings
 } from '../types';
 
 export const initialBankAccounts: BankAccount[] = [
@@ -1116,14 +1119,108 @@ export const initialAuditLogs: AuditLog[] = [
     action: 'LOGIN_SISTEMA',
     module: 'dashboard',
     details: 'Acesso autenticado ao painel administrativo IBNS ERP com perfil de Pastor Presidente.'
-  },
-  {
-    id: 'log-2',
-    timestamp: `${currentYear}-${currentMonth}-12T16:20:00Z`,
-    userName: 'Pb. Ricardo Silveira',
-    userRole: 'tesouraria',
-    action: 'CADASTRO_LANCAMENTO_NF',
-    module: 'finance',
-    details: 'Lançamento de despesa LANC-00105 de R$ 1.980,00 com anexo de Nota Fiscal DANFE 44921.'
   }
 ];
+
+// Contas bancárias prontas e limpas para operação real da IBNS
+export const cleanBankAccounts: BankAccount[] = [
+  {
+    id: 'acc-sicredi',
+    name: 'Sicredi Pioneira - Conta Corrente Principal',
+    type: 'Conta Corrente',
+    bankName: 'Sicredi Pioneira RS (Agência 0167)',
+    agency: '0167',
+    accountNumber: '58420-4',
+    initialBalance: 0.00,
+    currentBalance: 0.00,
+    color: '#16A34A'
+  },
+  {
+    id: 'acc-caixa',
+    name: 'Caixa Físico da Igreja (Tesouraria)',
+    type: 'Caixa Físico',
+    bankName: 'Tesouraria Templo Sede Sapiranga',
+    initialBalance: 0.00,
+    currentBalance: 0.00,
+    color: '#3B82F6'
+  }
+];
+
+export const cleanCostCenters: CostCenter[] = [
+  { id: 'cc-1', name: 'Administração Geral & Templo', budgetMonthly: 5000, color: '#64748B', iconName: 'Building2' },
+  { id: 'cc-2', name: 'Sustento Pastoral & Preletores', budgetMonthly: 8000, color: '#8B5CF6', iconName: 'UserCheck' },
+  { id: 'cc-3', name: 'Missões Nacionais & Mundiais', budgetMonthly: 3000, color: '#EF4444', iconName: 'Globe' },
+  { id: 'cc-4', name: 'Ação Social Amor em Ação', budgetMonthly: 2500, color: '#F59E0B', iconName: 'HeartHandshake' },
+  { id: 'cc-5', name: 'Ministério de Louvor & Som', budgetMonthly: 2000, color: '#06B6D4', iconName: 'Music' },
+  { id: 'cc-6', name: 'Ministério Infantil & EBD', budgetMonthly: 1500, color: '#EC4899', iconName: 'Smile' },
+  { id: 'cc-7', name: 'Eventos & Cultos Especiais', budgetMonthly: 2000, color: '#10B981', iconName: 'CalendarDays' },
+  { id: 'cc-8', name: 'Patrimônio & Manutenção Predial', budgetMonthly: 4000, color: '#F97316', iconName: 'Hammer' }
+];
+
+export const initialAssets: ChurchAsset[] = [];
+
+// Usuários institucionais cadastrados para acesso estritamente com @ibnsapiranga.com.br
+export const initialErpUsers: ErpUser[] = [
+  {
+    id: 'usr-1',
+    name: 'Pr. Marcos Oliveira',
+    email: 'pastor@ibnsapiranga.com.br',
+    role: 'pastor',
+    roleTitle: 'Pastor Presidente',
+    status: 'ativo',
+    phone: '(51) 99876-1122',
+    department: 'Gabinete Pastoral',
+    password: 'ibns@pastor2026',
+    createdAt: `${currentYear}-01-01T08:00:00Z`
+  },
+  {
+    id: 'usr-2',
+    name: 'Carlos Alberto Santos',
+    email: 'tesouraria@ibnsapiranga.com.br',
+    role: 'tesouraria',
+    roleTitle: 'Primeiro Tesoureiro',
+    status: 'ativo',
+    phone: '(51) 99123-4567',
+    department: 'Tesouraria & Finanças',
+    password: 'ibns@tesouraria2026',
+    createdAt: `${currentYear}-01-01T08:00:00Z`
+  },
+  {
+    id: 'usr-3',
+    name: 'Renata Silveira',
+    email: 'secretaria@ibnsapiranga.com.br',
+    role: 'secretaria',
+    roleTitle: 'Secretária Executiva',
+    status: 'ativo',
+    phone: '(51) 98877-6655',
+    department: 'Secretaria & Membresia',
+    password: 'ibns@secretaria2026',
+    createdAt: `${currentYear}-01-01T08:00:00Z`
+  },
+  {
+    id: 'usr-4',
+    name: 'Administrador do Sistema & TI',
+    email: 'admin@ibnsapiranga.com.br',
+    role: 'pastor',
+    roleTitle: 'Administrador de Segurança & TI',
+    status: 'ativo',
+    phone: '(51) 99999-8888',
+    department: 'Governança & TI',
+    password: 'ibns@admin2026',
+    createdAt: `${currentYear}-01-01T08:00:00Z`
+  }
+];
+
+export const initialSecuritySettings: SecuritySettings = {
+  restrictDomainOnly: true,
+  allowedDomain: 'ibnsapiranga.com.br',
+  blockNonBrazilIps: true,
+  maxFailedAttempts: 5,
+  lockoutMinutes: 15,
+  enableAntiBotCaptcha: true,
+  enableAntiDdosRateLimit: true,
+  simulateForeignIp: false,
+  ipWhitelist: ['127.0.0.1', '::1'],
+  ipBlacklist: []
+};
+
