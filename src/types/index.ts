@@ -476,7 +476,9 @@ export interface ErpUser {
   phone?: string;
   department?: string;
   password?: string;
+  mustChangePassword?: boolean;
   createdAt: string;
+  updatedAt?: string;
   lastLoginAt?: string;
 }
 

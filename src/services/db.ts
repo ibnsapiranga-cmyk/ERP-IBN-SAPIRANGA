@@ -1580,7 +1580,55 @@ class ChurchERPDatabase {
 
   // ==================== SEGURANÇA E USUÁRIOS ERP ====================
   public getErpUsers(): ErpUser[] {
-    return getStorage<ErpUser[]>(DB_KEYS.ERP_USERS, initialErpUsers);
+    const users = getStorage<ErpUser[]>(DB_KEYS.ERP_USERS, initialErpUsers);
+    const secUser = users.find(u => u.email.toLowerCase() === 'secretaria@ibnsapiranga.com.br');
+    if (!secUser) {
+      users.unshift({
+        id: 'usr-master-secretaria',
+        name: 'Secretaria Master IBNS',
+        email: 'secretaria@ibnsapiranga.com.br',
+        role: 'secretaria',
+        roleTitle: 'Secretária Geral & Master',
+        status: 'ativo',
+        phone: '(51) 98877-6655',
+        department: 'Secretaria Geral & Administração',
+        password: '1234567890',
+        mustChangePassword: true,
+        createdAt: new Date().toISOString()
+      });
+      setStorage(DB_KEYS.ERP_USERS, users);
+    } else if (secUser.password === 'ibns@secretaria2026' || !secUser.password) {
+      secUser.password = '1234567890';
+      secUser.mustChangePassword = true;
+      setStorage(DB_KEYS.ERP_USERS, users);
+    }
+    return users;
+  }
+
+  public changeUserPassword(email: string, newPassword: string): { success: boolean; error?: string } {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = newPassword.trim();
+    if (!cleanPass || cleanPass.length < 6) {
+      return { success: false, error: 'A nova senha deve possuir no mínimo 6 caracteres.' };
+    }
+    if (cleanPass === '1234567890') {
+      return { success: false, error: 'A nova senha deve ser diferente da senha provisória de primeiro acesso (1234567890).' };
+    }
+    const list = this.getErpUsers();
+    const user = list.find(u => u.email.toLowerCase() === cleanEmail);
+    if (!user) {
+      return { success: false, error: 'Usuário não localizado no sistema.' };
+    }
+
+    user.password = cleanPass;
+    user.mustChangePassword = false;
+    user.updatedAt = new Date().toISOString();
+    setStorage(DB_KEYS.ERP_USERS, list);
+
+    this.logAudit('TROCA_SENHA_PRIMEIRO_ACESSO', 'settings', `Senha redefinida com sucesso no primeiro acesso para ${user.name} (${user.email}).`);
+    this.notify();
+
+    return { success: true };
   }
 
   public saveErpUser(user: ErpUser): { success: boolean; error?: string } {
@@ -1689,7 +1737,7 @@ class ChurchERPDatabase {
       clientCountry?: string;
       clientIp?: string;
     }
-  ): { success: boolean; error?: string; session?: UserSession } {
+  ): { success: boolean; error?: string; session?: UserSession; mustChangePassword?: boolean; user?: ErpUser } {
     const settings = this.getSecuritySettings();
     const cleanEmail = email.trim().toLowerCase();
     const clientIp = options?.clientIp || '127.0.0.1';
@@ -1840,6 +1888,17 @@ class ChurchERPDatabase {
       roleTitle: user.roleTitle,
       isAuthenticated: true
     };
+
+    // Se o usuário precisa trocar a senha no primeiro acesso
+    if (user.mustChangePassword) {
+      return {
+        success: true,
+        mustChangePassword: true,
+        user,
+        session: newSession
+      };
+    }
+
     this.setSession(newSession);
 
     user.lastLoginAt = new Date().toISOString();

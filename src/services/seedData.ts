@@ -1159,8 +1159,20 @@ export const cleanCostCenters: CostCenter[] = [
 
 export const initialAssets: ChurchAsset[] = [];
 
-// Usuários institucionais cadastrados para acesso estritamente com @ibnsapiranga.com.br
 export const initialErpUsers: ErpUser[] = [
+  {
+    id: 'usr-master-secretaria',
+    name: 'Secretaria Master IBNS',
+    email: 'secretaria@ibnsapiranga.com.br',
+    role: 'secretaria',
+    roleTitle: 'Secretária Geral & Master',
+    status: 'ativo',
+    phone: '(51) 98877-6655',
+    department: 'Secretaria Geral & Administração',
+    password: '1234567890',
+    mustChangePassword: true,
+    createdAt: `${currentYear}-01-01T08:00:00Z`
+  },
   {
     id: 'usr-1',
     name: 'Pr. Marcos Oliveira',
@@ -1171,6 +1183,7 @@ export const initialErpUsers: ErpUser[] = [
     phone: '(51) 99876-1122',
     department: 'Gabinete Pastoral',
     password: 'ibns@pastor2026',
+    mustChangePassword: false,
     createdAt: `${currentYear}-01-01T08:00:00Z`
   },
   {
@@ -1183,18 +1196,7 @@ export const initialErpUsers: ErpUser[] = [
     phone: '(51) 99123-4567',
     department: 'Tesouraria & Finanças',
     password: 'ibns@tesouraria2026',
-    createdAt: `${currentYear}-01-01T08:00:00Z`
-  },
-  {
-    id: 'usr-3',
-    name: 'Renata Silveira',
-    email: 'secretaria@ibnsapiranga.com.br',
-    role: 'secretaria',
-    roleTitle: 'Secretária Executiva',
-    status: 'ativo',
-    phone: '(51) 98877-6655',
-    department: 'Secretaria & Membresia',
-    password: 'ibns@secretaria2026',
+    mustChangePassword: false,
     createdAt: `${currentYear}-01-01T08:00:00Z`
   },
   {
@@ -1207,6 +1209,7 @@ export const initialErpUsers: ErpUser[] = [
     phone: '(51) 99999-8888',
     department: 'Governança & TI',
     password: 'ibns@admin2026',
+    mustChangePassword: false,
     createdAt: `${currentYear}-01-01T08:00:00Z`
   }
 ];

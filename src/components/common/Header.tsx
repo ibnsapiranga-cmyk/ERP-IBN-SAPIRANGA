@@ -375,7 +375,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Tesouraria</span>
                     </button>
                     <button
-                      onClick={() => handleSwitchRole('secretaria', 'Secretária Geral', 'Diac. Eliane Silva', 'secretaria@ibnsapiranga.com.br')}
+                      onClick={() => handleSwitchRole('secretaria', 'Secretária Geral & Master', 'Secretaria Master IBNS', 'secretaria@ibnsapiranga.com.br')}
                       className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
                         session.email === 'secretaria@ibnsapiranga.com.br' 
                           ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
@@ -383,10 +383,10 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <div>
-                        <p className="font-bold">Diac. Eliane Silva</p>
+                        <p className="font-bold">Secretaria Master IBNS</p>
                         <p className="text-[10px] text-slate-500">secretaria@ibnsapiranga.com.br</p>
                       </div>
-                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Secretaria</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Secretaria Master</span>
                     </button>
                   </div>
 
