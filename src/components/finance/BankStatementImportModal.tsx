@@ -15,8 +15,10 @@ import {
   Check,
   Tag,
   HelpCircle,
-  Zap
+  Zap,
+  FileSpreadsheet
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { db, ParsedStatementItem } from '../../services/db';
 import { BankAccount } from '../../types';
 
@@ -38,7 +40,9 @@ export const BankStatementImportModal: React.FC<BankStatementImportModalProps> =
 
   const [step, setStep] = useState<'upload' | 'review'>('upload');
   const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id || '');
-  const [fileFormat, setFileFormat] = useState<'OFX' | 'CSV'>('OFX');
+  const [fileFormat, setFileFormat] = useState<'OFX' | 'CSV' | 'XLSX' | 'PDF'>('OFX');
+  const [fileBase64, setFileBase64] = useState<string>('');
+  const [mimeType, setMimeType] = useState<string>('');
   const [rawContent, setRawContent] = useState('');
   const [fileName, setFileName] = useState('');
   const [parsedItems, setParsedItems] = useState<ParsedStatementItem[]>([]);
@@ -53,18 +57,61 @@ export const BankStatementImportModal: React.FC<BankStatementImportModalProps> =
     if (!file) return;
 
     setFileName(file.name);
-    const isOfx = file.name.toLowerCase().endsWith('.ofx');
-    setFileFormat(isOfx ? 'OFX' : 'CSV');
+    const lower = file.name.toLowerCase();
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      setRawContent(text || '');
-    };
-    reader.readAsText(file);
+    if (lower.endsWith('.ofx')) {
+      setFileFormat('OFX');
+      setFileBase64('');
+      setMimeType('text/plain');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setRawContent(ev.target?.result as string || '');
+      };
+      reader.readAsText(file);
+    } else if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) {
+      setFileFormat('XLSX');
+      setFileBase64('');
+      setMimeType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const buffer = ev.target?.result as ArrayBuffer;
+          const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const csvText = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' });
+          setRawContent(csvText);
+        } catch (err) {
+          console.error('Erro ao ler XLSX:', err);
+          alert('Não foi possível ler o arquivo Excel. Verifique o formato.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (lower.endsWith('.pdf')) {
+      setFileFormat('PDF');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        const b64 = dataUrl.split(',')[1] || '';
+        setFileBase64(b64);
+        setMimeType('application/pdf');
+        setRawContent(`[DOCUMENTO EXTRATO PDF: ${file.name} - Tamanho: ${Math.round(file.size / 1024)} KB. Pronto para leitura inteligente e conciliação com IA.]`);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Default to CSV
+      setFileFormat('CSV');
+      setFileBase64('');
+      setMimeType('text/csv');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setRawContent(ev.target?.result as string || '');
+      };
+      reader.readAsText(file);
+    }
   };
 
-  const handleSampleLoad = (fmt: 'OFX' | 'CSV') => {
+  const handleSampleLoad = (fmt: 'OFX' | 'CSV' | 'XLSX' | 'PDF') => {
     setFileFormat(fmt);
     const todayStr = new Date().toISOString().split('T')[0];
     const dateDigits = new Date().toISOString().replace(/\D/g, '').substring(0, 8);
@@ -80,7 +127,35 @@ ${todayStr};PAGTO BOLETO RGE ENERGIA;-980.20
 ${todayStr};PIX RECEBIDO OFERTA VOLUNTARIA;45.00
 ${todayStr};DEBITO AUTOMATICO TARIFA BANCARIA CESTA;-48.90`;
       setRawContent(sampleCsv);
+      setFileBase64('');
       setFileName('extrato_sicredi_ibns_exemplo.csv');
+    } else if (fmt === 'XLSX') {
+      const sampleExcelData = `Data;Historico / Lancamento;Documento;Valor
+${todayStr};PIX TRANSF MARCOS OLIVEIRA;PIX-8921;750.00
+${todayStr};PIX RECEBIDO DOACAO CULTO;PIX-8922;50.00
+${todayStr};COMPRA NO DEBITO POSTO IPIRANGA;DEB-4102;-240.00
+${todayStr};COMPRA NO DEBITO SUPERMERCADO RISSUL;DEB-4103;-680.50
+${todayStr};PAGTO BOLETO ALUGUEL TEMPLO;BOL-0912;-3200.00
+${todayStr};PAGTO BOLETO RGE ENERGIA;BOL-0913;-980.20`;
+      setRawContent(sampleExcelData);
+      setFileBase64('');
+      setFileName('extrato_bancario_sicredi_ibns.xlsx');
+    } else if (fmt === 'PDF') {
+      const samplePdfText = `SICREDI - EXTRATO DE CONTA CORRENTE
+Cooperativa: 0167 / Conta: 84920-1 - IGREJA BATISTA NACIONAL EM SAPIRANGA
+Período: Mês Atual
+
+DATA       HISTÓRICO                                      VALOR (R$)
+${todayStr}  PIX RECEBIDO PR MARCOS OLIVEIRA                +750,00
+${todayStr}  PIX RECEBIDO OFERTA JOAO SILVA                 +35,00
+${todayStr}  COMPRA NO DEBITO POSTO IPIRANGA SAPIRANGA      -240,00
+${todayStr}  COMPRA NO DEBITO SUPERMERCADO RISSUL CESTAS    -680,50
+${todayStr}  PAGTO BOLETO ALUGUEL DO TEMPLO                 -3.200,00
+${todayStr}  PAGTO BOLETO RGE ENERGIA ELÉTRICA              -980,20
+${todayStr}  DEBITO AUTOMATICO TARIFA CESTA RELACIONAMENTO  -48,90`;
+      setRawContent(samplePdfText);
+      setFileBase64('');
+      setFileName('extrato_sicredi_oficial_ibns.pdf');
     } else {
       const sampleOfx = `OFXHEADER:100
 DATA:OFXSGML
@@ -125,19 +200,20 @@ DATA:OFXSGML
 </BANKMSGSRSV1>
 </OFX>`;
       setRawContent(sampleOfx);
+      setFileBase64('');
       setFileName('extrato_sicredi_ibns_exemplo.ofx');
     }
   };
 
   const handleAnalyzeWithAi = async () => {
-    if (!rawContent.trim()) {
-      alert('Por favor, selecione um arquivo de extrato ou cole o texto do extrato.');
+    if (!rawContent.trim() && !fileBase64) {
+      alert('Por favor, selecione um arquivo de extrato (CSV, XLSX, PDF ou OFX) ou cole o texto do extrato.');
       return;
     }
 
     setIsAiLoading(true);
     try {
-      const result = await db.reconcileWithAi(rawContent, selectedAccountId, fileFormat);
+      const result = await db.reconcileWithAi(rawContent, selectedAccountId, fileFormat, fileBase64, mimeType);
       if (result.items.length === 0) {
         alert('Nenhuma movimentação foi detectada no extrato.');
         setIsAiLoading(false);
@@ -153,6 +229,8 @@ DATA:OFXSGML
       setStep('review');
     } finally {
       setIsAiLoading(false);
+    }
+  };
     }
   };
 

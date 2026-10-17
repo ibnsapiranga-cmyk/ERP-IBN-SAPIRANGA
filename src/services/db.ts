@@ -27,7 +27,11 @@ import {
   AssetLoanRecord,
   ErpUser,
   SecuritySettings,
-  SecurityEventLog
+  SecurityEventLog,
+  ModuleType,
+  UserRole,
+  ModulePermissionConfig,
+  SectionPermissionConfig
 } from '../types';
 
 export interface ParsedStatementItem {
@@ -134,6 +138,135 @@ const DB_KEYS = {
   SECURITY_LOGS: 'ibns_security_logs_v3',
   FAILED_LOGINS: 'ibns_failed_logins_v3'
 };
+
+export interface SystemModuleSectionDef {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface SystemModuleDef {
+  id: ModuleType;
+  label: string;
+  description: string;
+  sections: SystemModuleSectionDef[];
+}
+
+export const SYSTEM_MODULE_DEFINITIONS: SystemModuleDef[] = [
+  {
+    id: 'dashboard',
+    label: 'Painel Geral (BI)',
+    description: 'Indicadores executivos, métricas da membresia e resumo financeiro',
+    sections: [
+      { id: 'metrics', label: 'Métricas Principais & Indicadores' },
+      { id: 'charts', label: 'Gráficos Financeiros & Análise de Fluxo' },
+      { id: 'alerts', label: 'Alertas Ministeriais & Aniversariantes' }
+    ]
+  },
+  {
+    id: 'finance',
+    label: 'Financeiro & Tesouraria',
+    description: 'Dízimos, ofertas, despesas, contas bancárias e conciliação bancária',
+    sections: [
+      { id: 'entries_expenses', label: 'Lançamentos de Entradas e Saídas' },
+      { id: 'statement_import', label: 'Importação e Conciliação de Extratos (IA)' },
+      { id: 'bank_accounts', label: 'Contas Bancárias, Caixas e Investimentos' },
+      { id: 'accounting_package', label: 'Fechamento & Pacote Contábil Mensal' },
+      { id: 'fixed_expenses', label: 'Despesas Fixas e Contratos Recorrentes' }
+    ]
+  },
+  {
+    id: 'members',
+    label: 'Secretaria & Membros',
+    description: 'Ficha cadastral, histórico batismal, carteirinhas e documentos',
+    sections: [
+      { id: 'member_registration', label: 'Cadastro e Edição de Membros' },
+      { id: 'member_cards', label: 'Emissão de Carteirinhas Ministeriais' },
+      { id: 'documents', label: 'Upload e Gestão de Documentos Anexos' },
+      { id: 'families', label: 'Grupos Familiares e Parentescos' }
+    ]
+  },
+  {
+    id: 'education',
+    label: 'Ensino & Discipulado',
+    description: 'Cursos bíblicos, turmas de EBD, matrículas e certificados',
+    sections: [
+      { id: 'courses', label: 'Gestão de Cursos e Turmas' },
+      { id: 'enrollments', label: 'Matrículas e Frequência de Alunos' },
+      { id: 'certificates', label: 'Emissão de Certificados de Conclusão' }
+    ]
+  },
+  {
+    id: 'social',
+    label: 'Projetos Sociais & Acolhimento',
+    description: 'Assistência a famílias em vulnerabilidade e cestas básicas',
+    sections: [
+      { id: 'assisted_families', label: 'Cadastro de Famílias Atendidas' },
+      { id: 'donations_deliveries', label: 'Registro de Entregas e Cestas Básicas' },
+      { id: 'volunteers', label: 'Gestão de Voluntários Sociais' }
+    ]
+  },
+  {
+    id: 'evangelism',
+    label: 'Evangelismo & Missões',
+    description: 'Ações de rua, apoio a missionários e decisões por Cristo',
+    sections: [
+      { id: 'actions', label: 'Registro de Ações Evangelísticas' },
+      { id: 'reached_people', label: 'Pessoas Alcançadas e Decisões' },
+      { id: 'missionaries', label: 'Missionários e Relatórios de Campo' }
+    ]
+  },
+  {
+    id: 'events',
+    label: 'Eventos & Conferências',
+    description: 'Congressos, retiros, cultos especiais e inscrições',
+    sections: [
+      { id: 'event_management', label: 'Criação e Gestão de Eventos' },
+      { id: 'registrations', label: 'Inscrições, Check-in e Pagamentos' }
+    ]
+  },
+  {
+    id: 'agenda',
+    label: 'Agenda Integrada',
+    description: 'Calendário eclesiástico, agendamento de cultos e ensaios',
+    sections: [
+      { id: 'calendar', label: 'Visualização da Agenda Mensal/Semanal' },
+      { id: 'schedule_events', label: 'Agendamento e Reserva de Espaços' }
+    ]
+  },
+  {
+    id: 'assets',
+    label: 'Patrimônio & Bens',
+    description: 'Controle de bens, equipamentos, manutenções e termos de cautela',
+    sections: [
+      { id: 'inventory', label: 'Inventário de Bens e Equipamentos' },
+      { id: 'maintenance', label: 'Histórico de Manutenções e Reparos' },
+      { id: 'loans', label: 'Termos de Cautela e Empréstimos' },
+      { id: 'depreciation', label: 'Cálculo de Depreciação Contábil' }
+    ]
+  },
+  {
+    id: 'reports',
+    label: 'Relatórios & BI',
+    description: 'Relatórios analíticos, exportações contábeis e demonstrativos',
+    sections: [
+      { id: 'financial_reports', label: 'Demonstrativos Financeiros e Balancetes' },
+      { id: 'membership_reports', label: 'Relatórios Demográficos de Membresia' },
+      { id: 'data_exports', label: 'Exportações em PDF, Excel e CSV' }
+    ]
+  },
+  {
+    id: 'settings',
+    label: 'Segurança & Auditoria',
+    description: 'Controle de acessos, firewall cibernético, logs e backups',
+    sections: [
+      { id: 'user_management', label: 'Gestão de Usuários e Níveis de Acesso' },
+      { id: 'cyber_security', label: 'Firewall, Camadas Cibernéticas e Geo-IP' },
+      { id: 'audit_logs', label: 'Trilha de Auditoria e Logs de Eventos' },
+      { id: 'database_ops', label: 'Backup, Restauração e Limpeza de Banco' }
+    ]
+  }
+];
 
 function getStorage<T>(key: string, fallback: T): T {
   try {
@@ -1054,8 +1187,8 @@ class ChurchERPDatabase {
     return await zip.generateAsync({ type: 'blob' });
   }
 
-  // --- Importação Inteligente de Extrato Bancário (OFX / CSV) com Pix & Matching de Membros ---
-  public parseStatementForReview(rawText: string, accountId: string, format: 'OFX' | 'CSV'): ParsedStatementItem[] {
+  // --- Importação Inteligente de Extrato Bancário (OFX / CSV / XLSX / PDF) com Pix & Matching de Membros ---
+  public parseStatementForReview(rawText: string, accountId: string, format: 'OFX' | 'CSV' | 'XLSX' | 'PDF'): ParsedStatementItem[] {
     const items: ParsedStatementItem[] = [];
     const members = this.getMembers().filter(m => m.status === 'Ativo');
     const costCenters = this.getCostCenters();
@@ -1342,7 +1475,13 @@ class ChurchERPDatabase {
   }
 
   // --- Reconciliação Inteligente com Inteligência Artificial Gemini ---
-  public async reconcileWithAi(rawText: string, accountId: string, format: 'OFX' | 'CSV'): Promise<{ items: ParsedStatementItem[]; source: string }> {
+  public async reconcileWithAi(
+    rawText: string, 
+    accountId: string, 
+    format: 'OFX' | 'CSV' | 'XLSX' | 'PDF',
+    fileBase64?: string,
+    mimeType?: string
+  ): Promise<{ items: ParsedStatementItem[]; source: string }> {
     const localItems = this.parseStatementForReview(rawText, accountId, format);
     try {
       const activeMembers = this.getMembers().filter(m => m.status === 'Ativo');
@@ -1354,6 +1493,8 @@ class ChurchERPDatabase {
         body: JSON.stringify({
           rawText,
           format,
+          fileBase64,
+          mimeType,
           members: activeMembers,
           costCenters
         })
@@ -2006,6 +2147,135 @@ class ChurchERPDatabase {
     
     this.logAudit('ZERAR_BANCO_PRODUCAO_REAL', 'settings', 'Banco de dados zerado para início de lançamentos reais da IBNS Sapiranga.');
     this.notify();
+  }
+
+  // ==================== CONTROLE DE ACESSO BASEADO EM FUNÇÃO (RBAC) & PERMISSÕES GRANULARES ====================
+  public getModuleDefinitions(): SystemModuleDef[] {
+    return SYSTEM_MODULE_DEFINITIONS;
+  }
+
+  public getDefaultPermissionsForRole(role: UserRole): Record<string, ModulePermissionConfig> {
+    const isMaster = role === 'pastor';
+    const isSecretaria = role === 'secretaria';
+    const isTesouraria = role === 'tesouraria';
+    const isLider = role === 'lider';
+
+    const permissions: Record<string, ModulePermissionConfig> = {};
+
+    SYSTEM_MODULE_DEFINITIONS.forEach(mod => {
+      let enabled = false;
+      let canEdit = false;
+
+      if (isMaster) {
+        enabled = true;
+        canEdit = true;
+      } else if (isSecretaria) {
+        if (['members', 'education', 'social', 'evangelism', 'events', 'agenda', 'assets', 'settings', 'dashboard'].includes(mod.id)) {
+          enabled = true;
+          canEdit = true;
+        } else if (mod.id === 'finance' || mod.id === 'reports') {
+          enabled = true;
+          canEdit = false; // Consulta apenas
+        }
+      } else if (isTesouraria) {
+        if (['finance', 'assets', 'reports', 'dashboard'].includes(mod.id)) {
+          enabled = true;
+          canEdit = true;
+        } else if (['members', 'events', 'social'].includes(mod.id)) {
+          enabled = true;
+          canEdit = false; // Apenas visualização
+        }
+      } else if (isLider) {
+        if (['agenda', 'events', 'education'].includes(mod.id)) {
+          enabled = true;
+          canEdit = true;
+        } else if (['dashboard', 'members'].includes(mod.id)) {
+          enabled = true;
+          canEdit = false;
+        }
+      } else {
+        if (mod.id === 'dashboard') {
+          enabled = true;
+          canEdit = false;
+        }
+      }
+
+      const sections: Record<string, SectionPermissionConfig> = {};
+      mod.sections.forEach(sec => {
+        sections[sec.id] = {
+          view: enabled,
+          edit: enabled && canEdit
+        };
+      });
+
+      permissions[mod.id] = {
+        enabled,
+        canEdit,
+        sections
+      };
+    });
+
+    return permissions;
+  }
+
+  public canUserView(moduleId: ModuleType, sectionId?: string, userEmail?: string): boolean {
+    const session = this.getSession();
+    const email = userEmail || session.email;
+    if (!session.isAuthenticated && !userEmail) return false;
+
+    const users = this.getErpUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (user && user.role === 'pastor') return true;
+
+    const role = user ? user.role : session.role;
+    const userPerms = (user && user.permissions) || this.getDefaultPermissionsForRole(role);
+    const modPerm = userPerms[moduleId];
+
+    if (!modPerm || !modPerm.enabled) return false;
+
+    if (sectionId && modPerm.sections && modPerm.sections[sectionId]) {
+      return modPerm.sections[sectionId].view;
+    }
+
+    return true;
+  }
+
+  public canUserEdit(moduleId: ModuleType, sectionId?: string, userEmail?: string): boolean {
+    const session = this.getSession();
+    const email = userEmail || session.email;
+    if (!session.isAuthenticated && !userEmail) return false;
+
+    const users = this.getErpUsers();
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (user && user.role === 'pastor') return true;
+
+    const role = user ? user.role : session.role;
+    const userPerms = (user && user.permissions) || this.getDefaultPermissionsForRole(role);
+    const modPerm = userPerms[moduleId];
+
+    if (!modPerm || !modPerm.enabled || !modPerm.canEdit) return false;
+
+    if (sectionId && modPerm.sections && modPerm.sections[sectionId]) {
+      return modPerm.sections[sectionId].edit;
+    }
+
+    return true;
+  }
+
+  public saveUserPermissions(userId: string, permissions: Record<string, ModulePermissionConfig>): { success: boolean; error?: string } {
+    const users = this.getErpUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx === -1) return { success: false, error: 'Usuário não localizado no sistema.' };
+
+    users[idx].permissions = permissions;
+    users[idx].updatedAt = new Date().toISOString();
+    setStorage(DB_KEYS.ERP_USERS, users);
+
+    this.logAudit('ATUALIZACAO_PERMISSOES_USUARIO', 'settings', `Níveis de acesso e permissões granulares atualizados para o usuário ${users[idx].name} (${users[idx].email}).`);
+    this.notify();
+    return { success: true };
   }
 
   // --- Reset para dados de demonstração (se necessário testar) ---

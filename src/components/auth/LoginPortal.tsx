@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { db } from '../../services/db';
 import { ErpUser, UserSession } from '../../types';
+import { ChurchLogo } from '../common/ChurchLogo';
 
 interface LoginPortalProps {
   onLoginSuccess: (session: UserSession) => void;
@@ -207,16 +208,22 @@ export const LoginPortal: React.FC<LoginPortalProps> = ({ onLoginSuccess }) => {
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-10">
         
         {/* Top Header with Church Branding */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white text-center relative">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/30 mb-3 border-2 border-amber-400">
-            ✝
+        <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-7 text-white text-center relative border-b border-amber-900/30">
+          {/* Official Church Logo */}
+          <div className="flex justify-center mb-2">
+            <ChurchLogo 
+              variant="stacked" 
+              size="lg" 
+              className="drop-shadow-lg" 
+            />
           </div>
-          <h1 className="text-lg font-black tracking-tight text-white">
-            IBNS ERP Eclesiástico
-          </h1>
-          <p className="text-xs text-amber-300 font-medium mt-0.5">
-            Igreja Batista Nacional em Sapiranga - RS
-          </p>
+
+          {/* Underneath the logo: ERP GESTÃO 360º PARA IGREJA */}
+          <div className="mt-3 pt-3 border-t border-slate-800/80">
+            <div className="inline-block px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs sm:text-sm font-black tracking-wider uppercase shadow-xs">
+              ERP GESTÃO 360º PARA IGREJA
+            </div>
+          </div>
 
           <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[11px] font-semibold text-slate-300">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />

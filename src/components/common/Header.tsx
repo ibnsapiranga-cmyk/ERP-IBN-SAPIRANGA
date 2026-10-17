@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ModuleType, UserRole, UserSession } from '../../types';
 import { db } from '../../services/db';
+import { ChurchLogo } from './ChurchLogo';
 
 interface HeaderProps {
   activeModule: ModuleType;
@@ -153,23 +154,21 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div 
               onClick={() => handleNavigate('dashboard')}
-              className="flex items-center gap-3 cursor-pointer group select-none"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group select-none py-1"
+              title="IBNS Sapiranga - ERP Gestão 360º"
             >
-              <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xl shadow-xs group-hover:scale-105 transition-transform">
-                ✝
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
-                    IBNS SAPIRANGA
-                  </h1>
-                  <span className="hidden sm:inline-block bg-amber-100 text-amber-900 text-[10px] px-2 py-0.5 rounded-full font-bold border border-amber-300">
-                    ERP Eclesiástico
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
-                  Igreja Batista Nacional em Sapiranga / RS
-                </p>
+              <ChurchLogo 
+                variant="horizontal" 
+                size="sm" 
+                className="group-hover:opacity-90 transition-opacity" 
+              />
+              <div className="hidden xl:flex flex-col border-l border-slate-200 pl-3">
+                <span className="text-[10px] font-black text-amber-700 tracking-wider uppercase leading-tight">
+                  ERP GESTÃO 360º
+                </span>
+                <span className="text-[9px] text-slate-500 font-semibold leading-tight">
+                  Gestão Total
+                </span>
               </div>
             </div>
           </div>
@@ -341,53 +340,14 @@ export const Header: React.FC<HeaderProps> = ({
                     <p className="text-[11px] font-mono text-slate-500 mt-0.5">{session.email || 'pastor@ibnsapiranga.com.br'}</p>
                   </div>
 
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-2">
-                    Alternar Conta Institucional:
-                  </p>
-
-                  <div className="space-y-1 text-xs">
-                    <button
-                      onClick={() => handleSwitchRole('pastor', 'Pastor Presidente', 'Pr. Marcos Oliveira', 'pastor@ibnsapiranga.com.br')}
-                      className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.email === 'pastor@ibnsapiranga.com.br' 
-                          ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold">Pr. Marcos Oliveira</p>
-                        <p className="text-[10px] text-slate-500">pastor@ibnsapiranga.com.br</p>
-                      </div>
-                      <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Pastor</span>
-                    </button>
-                    <button
-                      onClick={() => handleSwitchRole('tesouraria', 'Tesoureiro Chefe', 'Pb. Ricardo Silveira', 'tesouraria@ibnsapiranga.com.br')}
-                      className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.email === 'tesouraria@ibnsapiranga.com.br' 
-                          ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold">Pb. Ricardo Silveira</p>
-                        <p className="text-[10px] text-slate-500">tesouraria@ibnsapiranga.com.br</p>
-                      </div>
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Tesouraria</span>
-                    </button>
-                    <button
-                      onClick={() => handleSwitchRole('secretaria', 'Secretária Geral & Master', 'Secretaria Master IBNS', 'secretaria@ibnsapiranga.com.br')}
-                      className={`w-full text-left p-2 rounded-xl flex items-center justify-between font-medium transition-colors ${
-                        session.email === 'secretaria@ibnsapiranga.com.br' 
-                          ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' 
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div>
-                        <p className="font-bold">Secretaria Master IBNS</p>
-                        <p className="text-[10px] text-slate-500">secretaria@ibnsapiranga.com.br</p>
-                      </div>
-                      <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">Secretaria Master</span>
-                    </button>
+                  {/* Sessão Ativa & Detalhes */}
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-600 mb-2">
+                    <p className="text-[11px] font-semibold text-slate-500">Credencial Operacional:</p>
+                    <p className="font-mono text-slate-800 text-[11px] truncate">{session.email}</p>
+                    <p className="text-[10px] text-emerald-700 font-bold mt-1 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Sessão Criptografada Ativa
+                    </p>
                   </div>
 
                   <div className="pt-2.5 mt-2.5 border-t border-slate-100 flex flex-col gap-1.5">

@@ -4,6 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import pdf from 'pdf-parse';
 
 dotenv.config();
 
@@ -88,13 +89,64 @@ app.get('/api/security/client-info', (req: Request, res: Response) => {
   });
 });
 
-// AI Bank Statement Reconciliation Route using Gemini
+// Correios CEP integration endpoint (ViaCEP proxy with validation)
+app.get('/api/correios/cep/:cep', rateLimiter(60, 60000), async (req: Request, res: Response) => {
+  try {
+    const rawCep = req.params.cep || '';
+    const cleanCep = rawCep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) {
+      res.status(400).json({ error: 'CEP inválido. Deve conter exatamente 8 dígitos.' });
+      return;
+    }
+
+    const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+    if (!response.ok) {
+      throw new Error(`ViaCEP HTTP status ${response.status}`);
+    }
+
+    const data = (await response.json()) as any;
+    if (data.erro) {
+      res.status(404).json({ error: 'CEP não encontrado na base de dados dos Correios.' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      cep: data.cep,
+      street: data.logradouro || '',
+      complement: data.complemento || '',
+      neighborhood: data.bairro || '',
+      city: data.localidade || '',
+      state: data.uf || 'RS',
+      ibge: data.ibge || '',
+      ddd: data.ddd || ''
+    });
+  } catch (err: any) {
+    console.error('Error in /api/correios/cep:', err);
+    res.status(500).json({ error: 'Falha ao consultar os Correios.', details: err?.message });
+  }
+});
+
+// AI Bank Statement Reconciliation Route using Gemini (supports CSV, XLSX, PDF, OFX)
 app.post('/api/ai/reconcile-statement', rateLimiter(30, 60000), async (req: Request, res: Response) => {
   try {
-    const { rawText, format, members = [], costCenters = [] } = req.body;
+    let { rawText, format, fileBase64, mimeType, members = [], costCenters = [] } = req.body;
 
-    if (!rawText || typeof rawText !== 'string') {
-      res.status(400).json({ error: 'Conteúdo do extrato não fornecido.' });
+    // If PDF base64 provided and rawText is empty, extract text from PDF using pdf-parse
+    if (fileBase64 && (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0)) {
+      try {
+        const buffer = Buffer.from(fileBase64, 'base64');
+        const pdfResult = await pdf(buffer);
+        if (pdfResult && pdfResult.text) {
+          rawText = pdfResult.text;
+        }
+      } catch (pdfError) {
+        console.warn('PDF text extraction fallback notice:', pdfError);
+      }
+    }
+
+    if (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0) {
+      res.status(400).json({ error: 'Conteúdo do extrato não fornecido ou ilegível no arquivo.' });
       return;
     }
 
@@ -106,7 +158,7 @@ app.post('/api/ai/reconcile-statement', rateLimiter(30, 60000), async (req: Requ
           : '';
 
         const prompt = `Você é o assistente contábil e financeiro de inteligência artificial da Igreja Batista Nacional em Sapiranga (IBNS).
-Analise o extrato bancário (formato ${format || 'OFX/CSV'}) a seguir.
+Analise o extrato bancário (formato ${format || 'OFX/CSV/XLSX/PDF'}) a seguir.
 
 INSTRUÇÕES RIGOROSAS:
 1. Identifique CADA transação e seu método de pagamento real com base na descrição:

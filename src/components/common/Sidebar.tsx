@@ -14,8 +14,9 @@ import {
   Church,
   ChevronRight,
   Landmark
-} from 'lucide-react';
 import { ModuleType } from '../../types';
+import { db } from '../../services/db';
+import { ChurchLogo } from './ChurchLogo';
 
 interface SidebarProps {
   activeModule: ModuleType;
@@ -139,16 +140,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Mobile Header Inside Drawer */}
-        <div className="p-4 flex items-center justify-between border-b border-slate-200 bg-slate-50 lg:hidden">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-base shadow-sm">
-              ✝
-            </div>
-            <div>
-              <p className="text-sm font-black text-slate-900 leading-none">IBNS Sapiranga</p>
-              <p className="text-[11px] font-semibold text-amber-700 mt-0.5">ERP de Gestão Total</p>
-            </div>
-          </div>
+        <div className="p-3.5 flex items-center justify-between border-b border-slate-200 bg-slate-50 lg:hidden">
+          <ChurchLogo 
+            variant="compact" 
+            size="sm" 
+            className="py-1" 
+          />
           <button 
             onClick={handleClose}
             className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-200/80 rounded-xl transition-colors"
@@ -159,18 +156,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Church Identity Header (Desktop only) */}
-        <div className="p-4 border-b border-slate-100 bg-gradient-to-br from-amber-50/50 via-slate-50 to-white hidden lg:block">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-black text-lg flex items-center justify-center shadow-xs">
-              ✝
-            </div>
-            <div>
-              <p className="text-xs uppercase font-extrabold tracking-wider text-amber-800">
-                Igreja Batista Nacional
-              </p>
-              <p className="text-sm font-bold text-slate-800">
-                Sapiranga - RS
-              </p>
+        <div className="p-4 border-b border-slate-100 bg-gradient-to-br from-amber-50/40 via-slate-50 to-white hidden lg:block">
+          <div className="flex flex-col gap-1.5">
+            <ChurchLogo 
+              variant="horizontal" 
+              size="sm" 
+              className="w-full" 
+            />
+            <div className="mt-1 flex items-center justify-between px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-800 uppercase tracking-wider">
+              <span>ERP GESTÃO 360º</span>
+              <span className="text-[9px] font-semibold text-slate-500 lowercase">v3.0</span>
             </div>
           </div>
         </div>

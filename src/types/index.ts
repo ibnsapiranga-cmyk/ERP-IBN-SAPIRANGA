@@ -168,6 +168,7 @@ export interface Member {
     zipCode: string;
   };
   role: MemberRole;
+  roles?: string[]; // Suporte a múltiplos cargos / ocupações selecionados via checkbox
   status: MemberStatus;
   ministries: string[]; // Louvor, Infantil, Diaconia, etc.
   baptismDate?: string;
@@ -466,6 +467,17 @@ export interface ChurchAsset {
 }
 
 // ==================== SEGURANÇA E USUÁRIOS ERP ====================
+export interface SectionPermissionConfig {
+  view: boolean;
+  edit: boolean;
+}
+
+export interface ModulePermissionConfig {
+  enabled: boolean; // Se o usuário pode visualizar e acessar o módulo
+  canEdit: boolean; // Se o usuário tem poder de inclusão, alteração e exclusão
+  sections?: Record<string, SectionPermissionConfig>; // Níveis granulares por seção interna
+}
+
 export interface ErpUser {
   id: string;
   name: string;
@@ -477,6 +489,7 @@ export interface ErpUser {
   department?: string;
   password?: string;
   mustChangePassword?: boolean;
+  permissions?: Record<string, ModulePermissionConfig>;
   createdAt: string;
   updatedAt?: string;
   lastLoginAt?: string;
